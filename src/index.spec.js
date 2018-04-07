@@ -1,6 +1,6 @@
 import Promise from 'promise'
 import PromiseMiddleware from './index'
-import sinon, { assert }  from 'sinon'
+import sinon, { assert, match }  from 'sinon'
 
 describe('PromiseMiddlware', () => {
   const sandbox = sinon.sandbox.create()
@@ -33,11 +33,7 @@ describe('PromiseMiddlware', () => {
         let args = [1, 'foo', 'bar', 'please']
         MyWrappedFetcher.execute(...args)
         assert.calledOnce(MyWrappedFetcher._onRequest)
-        assert.calledWith(MyWrappedFetcher._onRequest, {
-          args,
-          setResponse: function setResponse () {},
-          setError: function setError () {}
-        })
+        assert.calledWith(MyWrappedFetcher._onRequest, match({ args }))
       })
     })
   })
