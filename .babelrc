@@ -1,0 +1,11 @@
+{
+  "presets": [
+    "env",
+    "flow"
+  ],
+  "plugins": [
+    "syntax-async-functions",
+    "transform-object-rest-spread",
+    "transform-class-properties",
+  ]
+}

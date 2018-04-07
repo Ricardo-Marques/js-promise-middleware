@@ -1,0 +1,47 @@
+{
+  "name": "js-promise-middlware",
+  "version": "0.0.1",
+  "description": "A middleware wrapper for promises that simplifies side effect management.",
+  "main": "./es/index.js",
+  "scripts": {
+    "build": "rimraf es && babel src --out-dir es && flow-copy-source src es && yarn run build:copy-files",
+    "build:copy-files": "babel-node ./scripts/copy-files.js",
+    "publish-package": "yarn run build && cd es && yarn publish",
+    "prepublishOnly": "yarn run build",
+    "lint": "eslint src test",
+    "test": "jest",
+    "test:watch": "yarn test --watch",
+    "flow": "flow && flow stop"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ricardo-marques/js-promise-middlware"
+  },
+  "author": "Ricardo Marques (http://github.com/ricardo-marques)",
+  "bugs": {
+    "url": "https://github.com/ricardo-marques/js-promise-middlware/issues"
+  },
+  "homepage": "https://github.com/ricardo-marques/js-promise-middlware",
+  "devDependencies": {
+    "babel-cli": "6.3.17",
+    "babel-core": "6.26.0",
+    "babel-eslint": "8.0.2",
+    "babel-plugin-syntax-async-functions": "^6.13.0",
+    "babel-plugin-transform-class-properties": "6.24.1",
+    "babel-plugin-transform-object-rest-spread": "6.26.0",
+    "babel-plugin-transform-runtime": "6.23.0",
+    "babel-preset-env": "1.6.1",
+    "babel-preset-flow": "6.23.0",
+    "babel-register": "6.3.13",
+    "cross-env": "5.1.1",
+    "eslint": "4.11.0",
+    "eslint-plugin-flowtype": "2.39.1",
+    "flow-bin": "^0.66.0",
+    "flow-copy-source": "^1.2.1",
+    "jest": "^22.4.3",
+    "promise": "^8.0.1",
+    "rimraf": "2.6.2",
+    "sinon": "2.3.4"
+  }
+}
