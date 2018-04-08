@@ -1,7 +1,7 @@
 # js-promise-middleware
 A middleware wrapper for promises that simplifies side effect management.
 
-[![CircleCI](https://circleci.com/gh/Ricardo-Marques/js-promise-middleware.svg?style=shield&circle-token=517dfd482b2e7d6825bfba3b417e70569eccce18)](https://circleci.com/gh/ricardo-marques/js-promise-middleware) [![Coverage Status](https://coveralls.io/repos/github/Ricardo-Marques/js-promise-middleware/badge.svg?branch=master)](https://coveralls.io/github/Ricardo-Marques/js-promise-middleware?branch=master)
+[![CircleCI](https://img.shields.io/circleci/project/github/Ricardo-Marques/js-promise-middleware.svg)](https://circleci.com/gh/ricardo-marques/js-promise-middleware) [![Coverage Status](https://img.shields.io/coveralls/github/Ricardo-Marques/js-promise-middleware.svg)](https://coveralls.io/github/Ricardo-Marques/js-promise-middleware?branch=master)
 
 ## Attention
 
