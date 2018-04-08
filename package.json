@@ -12,7 +12,7 @@
     "test": "jest",
     "test:watch": "yarn test --watch",
     "test:coverage": "yarn test --coverage",
-    "test:ci": "yarn test:coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
+    "test:ci": "node_modules/.bin/jest --coverage && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "flow": "flow && flow stop"
   },
   "license": "MIT",
@@ -35,9 +35,7 @@
     "babel-plugin-transform-runtime": "6.23.0",
     "babel-preset-env": "1.6.1",
     "babel-preset-flow": "6.23.0",
-    "babel-register": "6.3.13",
     "coveralls": "^3.0.0",
-    "cross-env": "5.1.1",
     "eslint": "4.11.0",
     "eslint-plugin-flowtype": "2.39.1",
     "flow-bin": "^0.66.0",
