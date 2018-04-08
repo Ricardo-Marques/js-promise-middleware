@@ -28,6 +28,7 @@ export default class PromiseMiddleware<T: Action> {
   constructor (action: T) {
     this._action = action
     this._middleware = {}
+    this.test= {}
   }
 
   execute (...args: Array<*>) {
