@@ -1,6 +1,12 @@
+.DS_Store
+
 node_modules
 npm-debug.log
 yarn-error.log
-.DS_Store
-es
+
+// test related artifacts
 coverage
+.coveralls.yml
+
+// build related artifacts
+es

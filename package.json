@@ -46,5 +46,8 @@
     "promise": "^8.0.1",
     "rimraf": "2.6.2",
     "sinon": "2.3.4"
+  },
+  "jest": {
+    "coverageDirectory": "coverage"
   }
 }
