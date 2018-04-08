@@ -19,7 +19,7 @@ type ActionMiddleware = {
   onError?: ?Array<$PropertyType<MiddlewareTypes, 'onError'>>
 }
 
-type Action = (*) => Promise<*>
+type Action = (*) => Promise<*
 
 export default class PromiseMiddleware<T: Action> {
   _action: T
