@@ -11,6 +11,8 @@
     "lint": "eslint src test",
     "test": "jest",
     "test:watch": "yarn test --watch",
+    "test:coverage": "yarn test --coverage",
+    "test:watch+coverage": "yarn test --watch --coverage",
     "flow": "flow && flow stop"
   },
   "license": "MIT",
