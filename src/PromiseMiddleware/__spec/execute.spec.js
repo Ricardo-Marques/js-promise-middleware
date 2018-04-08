@@ -18,11 +18,15 @@ describe('execute', () => {
   })
 
   it('calls _onRequest, giving the arguments, a setResponse and a setError function', () => {
-    sandbox.spy(MyWrappedFetcher, '_onRequest')
     let args = []
+    sandbox.stub(MyWrappedFetcher, '_onRequest').callsFake(({ args, setResponse, setError }) => {
+      expect(args).toEqual(args)
+      expect(setResponse).toBeInstanceOf(Function)
+      expect(setError).toBeInstanceOf(Function)
+      return {}
+    })
     MyWrappedFetcher.execute(...args)
     assert.calledOnce(MyWrappedFetcher._onRequest)
-    assert.calledWith(MyWrappedFetcher._onRequest, match({ args }))
   })
 
   describe('if setResponse is called', () => {
@@ -53,9 +57,7 @@ describe('execute', () => {
 
     it('does not execute the action', () => {
       sandbox.spy(MyWrappedFetcher, '_action')
-
       MyWrappedFetcher.execute(...args)
-
       assert.notCalled(MyWrappedFetcher._action)
     })
   })
@@ -88,9 +90,7 @@ describe('execute', () => {
 
     it('does not execute the action', () => {
       sandbox.spy(MyWrappedFetcher, '_action')
-
       MyWrappedFetcher.execute(...args)
-
       assert.notCalled(MyWrappedFetcher._action)
     })
   })

@@ -1,7 +1,6 @@
 import Promise from 'promise'
 import PromiseMiddleware from '../index'
 
-
 describe('PromiseMiddlware', () => {
   const fetcher = () => new Promise(() => {})
 

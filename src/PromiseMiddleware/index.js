@@ -97,7 +97,7 @@ export default class PromiseMiddleware<T: Action> {
   }
 
   _callMiddleware (middleware: ?Array<*>, eventProperties: *) {
-    if (!middleware || middleware.length === 0) {
+    if (middleware == null || middleware.length === 0) {
       return { finished: true }
     }
 
@@ -112,6 +112,8 @@ export default class PromiseMiddleware<T: Action> {
 
     if (wasStopped) {
       return { wasStopped: true }
+    } else if (restMiddleware.length === 0) {
+      return { finished: true }
     } else {
       return this._callMiddleware(restMiddleware, eventProperties)
     }
