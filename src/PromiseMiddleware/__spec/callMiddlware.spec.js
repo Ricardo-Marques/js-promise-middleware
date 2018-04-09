@@ -24,8 +24,8 @@ describe('callMiddlware', () => {
   it('calls the first middleware, giving the eventProperties and a "stop" cb', () => {
     const eventProperties = {}
     const middleware = [sandbox.stub().callsFake((eventProperties, stop) => {
-        expect(eventProperties).toEqual(eventProperties)
-        expect(stop).toBeInstanceOf(Function)
+      expect(eventProperties).toEqual(eventProperties)
+      expect(stop).toBeInstanceOf(Function)
     })]
 
     MyWrappedFetcher._callMiddleware(middleware, eventProperties)

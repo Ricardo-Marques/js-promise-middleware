@@ -1,6 +1,6 @@
 // @flow
 type EventProperties = {|
-  onRequest: {| args: Array<*>, setResponse: (*) => void, setError: (*) => void |},
+  onRequest: {| args: Array<*>, res: (*) => void, rej: (*) => void |},
   onSuccess: {| args: Array<*>, res: * |},
   onError: {| args: Array<*>, err: * |}
 |}
@@ -32,12 +32,12 @@ export default class PromiseMiddleware<T: Action> {
 
   execute (...args: Array<*>) {
     let hardCodedResponse = undefined
-    const setResponse = res => hardCodedResponse = res
+    const res = response => hardCodedResponse = response
 
     let hardCodedError = undefined
-    const setError = err => hardCodedError = err
+    const rej = error => hardCodedError = error
 
-    const requestMiddlewareResult = this._onRequest({ args, setResponse, setError })
+    const requestMiddlewareResult = this._onRequest({ args, res, rej })
 
     // if any of the onRequest middleware asked to stop
     if (requestMiddlewareResult.wasStopped) {
