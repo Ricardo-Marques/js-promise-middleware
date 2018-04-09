@@ -1,5 +1,5 @@
 import Promise from 'promise'
-import sinon, { assert, match } from 'sinon'
+import sinon, { assert } from 'sinon'
 
 import PromiseMiddleware from '../index'
 
@@ -17,24 +17,24 @@ describe('execute', () => {
     sandbox.restore()
   })
 
-  it('calls _onRequest, giving the arguments, a setResponse and a setError function', () => {
+  it('calls _onRequest, giving the arguments, a res and a rej function', () => {
     let args = []
-    sandbox.stub(MyWrappedFetcher, '_onRequest').callsFake(({ args, setResponse, setError }) => {
+    sandbox.stub(MyWrappedFetcher, '_onRequest').callsFake(({ args, res, rej }) => {
       expect(args).toEqual(args)
-      expect(setResponse).toBeInstanceOf(Function)
-      expect(setError).toBeInstanceOf(Function)
+      expect(res).toBeInstanceOf(Function)
+      expect(rej).toBeInstanceOf(Function)
       return {}
     })
     MyWrappedFetcher.execute(...args)
     assert.calledOnce(MyWrappedFetcher._onRequest)
   })
 
-  describe('if setResponse is called', () => {
+  describe('if res is called', () => {
     const response = {}
     let args = []
     beforeEach(() => {
-      sandbox.stub(MyWrappedFetcher, '_onRequest').callsFake(({ setResponse }) => {
-        setResponse(response)
+      sandbox.stub(MyWrappedFetcher, '_onRequest').callsFake(({ res }) => {
+        res(response)
         return {}
       })
     })
@@ -62,12 +62,12 @@ describe('execute', () => {
     })
   })
 
-  describe('if setError is called', () => {
+  describe('if rej is called', () => {
     const error = {}
     let args = []
     beforeEach(() => {
-      sandbox.stub(MyWrappedFetcher, '_onRequest').callsFake(({ setError }) => {
-        setError(error)
+      sandbox.stub(MyWrappedFetcher, '_onRequest').callsFake(({ rej }) => {
+        rej(error)
         return {}
       })
     })
