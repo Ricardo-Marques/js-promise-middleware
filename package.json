@@ -1,5 +1,5 @@
 {
-  "name": "js-promise-middlware",
+  "name": "js-promise-middleware",
   "version": "0.0.1",
   "description": "A middleware wrapper for promises that simplifies side effect management.",
   "main": "./es/index.js",
@@ -18,13 +18,13 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ricardo-marques/js-promise-middlware"
+    "url": "https://github.com/ricardo-marques/js-promise-middleware"
   },
   "author": "Ricardo Marques (http://github.com/ricardo-marques)",
   "bugs": {
-    "url": "https://github.com/ricardo-marques/js-promise-middlware/issues"
+    "url": "https://github.com/ricardo-marques/js-promise-middleware/issues"
   },
-  "homepage": "https://github.com/ricardo-marques/js-promise-middlware",
+  "homepage": "https://github.com/ricardo-marques/js-promise-middleware",
   "devDependencies": {
     "babel-cli": "6.3.17",
     "babel-core": "6.26.0",

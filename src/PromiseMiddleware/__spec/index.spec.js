@@ -1,6 +1,6 @@
 import PromiseMiddleware from '../index'
 
-describe('PromiseMiddlware', () => {
+describe('Promisemiddleware', () => {
   const fetcher = () => new Promise(() => {})
 
   let MyWrappedFetcher

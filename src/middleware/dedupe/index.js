@@ -11,7 +11,7 @@ const dedupe = (idGetter: IdGetter) => (
 ) => {
   let underwayFetches = {}
 
-  const onRequest = ({ args }, stop) => {
+  const onRequest = ({ args }, { stop }) => {
     const id = idGetter(...args)
     if (underwayFetches[id]) {
       stop()

@@ -22,14 +22,14 @@ describe('onEvent', () => {
       const middleware = () => {}
       MyWrappedFetcher._middleware.onRequest = [middleware]
 
-      const eventProperties = {}
-      MyWrappedFetcher._callRequestMiddleware(eventProperties)
+      const event = {}
+      MyWrappedFetcher._callRequestMiddleware(event)
 
       assert.calledOnce(MyWrappedFetcher._callMiddleware)
       assert.calledWith(
         MyWrappedFetcher._callMiddleware,
         [middleware],
-        eventProperties
+        event
       )
     })
   })
@@ -41,14 +41,14 @@ describe('onEvent', () => {
       const middleware = () => {}
       MyWrappedFetcher._middleware.onSuccess = [middleware]
 
-      const eventProperties = {}
-      MyWrappedFetcher._callSuccessMiddleware(eventProperties)
+      const event = {}
+      MyWrappedFetcher._callSuccessMiddleware(event)
 
       assert.calledOnce(MyWrappedFetcher._callMiddleware)
       assert.calledWith(
         MyWrappedFetcher._callMiddleware,
         [middleware],
-        eventProperties
+        event
       )
     })
   })
@@ -60,14 +60,14 @@ describe('onEvent', () => {
       const middleware = () => {}
       MyWrappedFetcher._middleware.onError = [middleware]
 
-      const eventProperties = {}
-      MyWrappedFetcher._callErrorMiddleware(eventProperties)
+      const event = {}
+      MyWrappedFetcher._callErrorMiddleware(event)
 
       assert.calledOnce(MyWrappedFetcher._callMiddleware)
       assert.calledWith(
         MyWrappedFetcher._callMiddleware,
         [middleware],
-        eventProperties
+        event
       )
     })
   })

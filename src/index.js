@@ -1,3 +1,3 @@
-import PromiseMiddlware from './PromiseMiddlware'
+import Promisemiddleware from './Promisemiddleware'
 
-export default PromiseMiddlware
+export default Promisemiddleware

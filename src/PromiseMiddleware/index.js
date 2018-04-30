@@ -7,6 +7,7 @@ import type {
   RequestMiddleware,
   SuccessMiddleware,
   ErrorMiddleware,
+  Event,
   RequestEvent,
   SuccessEvent,
   ErrorEvent,
@@ -28,36 +29,25 @@ export default class PromiseMiddleware<T: Action, RT, ET>
   }
 
   request(...args: Arguments<T>) {
-    let hardCodedResponse = undefined
-    const res = (response: RT): void => {
-      hardCodedResponse = response
-    }
-
-    let hardCodedError = undefined
-    const rej = (error: ET): void => {
-      hardCodedError = error
-    }
-
-    const requestMiddlewareResult = this._callRequestMiddleware({
-      args,
-      res,
-      rej
-    })
+    const requestMiddlewareResult = this._callRequestMiddleware({ args })
 
     // if any of the onRequest middleware asked to stop
-    if (requestMiddlewareResult.canceled) {
+    if (requestMiddlewareResult.stopped) {
       return
     }
 
-    // if any of the onRequest middleware called setResponse we call on sucess middleware
-    if (hardCodedResponse !== undefined) {
-      this._callSuccessMiddleware({ args, res: hardCodedResponse })
+    // if any of the onRequest middleware called next with some data we call on sucess middleware
+    if (requestMiddlewareResult.data != null) {
+      this._callSuccessMiddleware({
+        args,
+        res: requestMiddlewareResult.data
+      })
       return
     }
 
     // if any of the onRequest middleware called setError we call on error middleware
-    if (hardCodedError !== undefined) {
-      this._callErrorMiddleware({ args, err: hardCodedError })
+    if (requestMiddlewareResult.error != null) {
+      this._callErrorMiddleware({ args, err: requestMiddlewareResult.error })
       return
     }
 
@@ -65,9 +55,13 @@ export default class PromiseMiddleware<T: Action, RT, ET>
     // if any of those middleware call stop, no further middleware will be executed
     this._action(...args).then(
       res => {
+        // in any of the onSuccess middleware, calling next with data will call the next middleware
+        // with that data instead of the data given here
         this._callSuccessMiddleware({ args, res })
       },
       err => {
+        // in any of the onError middleware, calling error with an error will call the next middleware
+        // with that error, instead of the error given here
         this._callErrorMiddleware({ args, err })
       }
     )
@@ -83,7 +77,7 @@ export default class PromiseMiddleware<T: Action, RT, ET>
     }
   }
 
-  onSuccess(middleware: SuccessMiddleware<Arguments<T>, RT>) {
+  onSuccess(middleware: SuccessMiddleware<Arguments<T>, RT, ET>) {
     this._middleware.onSuccess.push(middleware)
     return () => {
       this._middleware.onSuccess.splice(
@@ -93,7 +87,7 @@ export default class PromiseMiddleware<T: Action, RT, ET>
     }
   }
 
-  onError(middleware: ErrorMiddleware<Arguments<T>, ET>) {
+  onError(middleware: ErrorMiddleware<Arguments<T>, RT, ET>) {
     this._middleware.onError.push(middleware)
     return () => {
       this._middleware.onError.splice(
@@ -103,7 +97,7 @@ export default class PromiseMiddleware<T: Action, RT, ET>
     }
   }
 
-  _callRequestMiddleware(event: RequestEvent<Arguments<T>, RT, ET>) {
+  _callRequestMiddleware(event: RequestEvent<Arguments<T>>) {
     return this._callMiddleware(this._middleware.onRequest, event)
   }
 
@@ -115,26 +109,62 @@ export default class PromiseMiddleware<T: Action, RT, ET>
     return this._callMiddleware(this._middleware.onError, event)
   }
 
-  _callMiddleware(middleware: Array<*>, event: *): MiddlewareResult {
+  _callMiddleware(middleware: Array<*>, event: *): MiddlewareResult<RT, ET> {
     if (middleware.length === 0) {
-      return { finished: true, canceled: false }
+      return { finished: true, stopped: false }
     }
 
     const [thisMiddleware, ...restMiddleware] = middleware
 
-    let canceled = false
+    let stopped = false
     const stop = () => {
-      canceled = true
+      stopped = true
     }
 
-    thisMiddleware(event, stop)
+    let parsedData = null
+    let next = (data: RT) => {
+      parsedData = data
+    }
 
-    if (canceled) {
-      return { canceled: true, finished: false }
-    } else if (restMiddleware.length === 0) {
-      return { finished: true, canceled: false }
+    let thrownError = null
+    let error = (error: ET) => {
+      thrownError = error
+    }
+
+    if (event.err != null) {
+      thisMiddleware(event, { stop, error })
+    } else if (event.res != null) {
+      thisMiddleware(event, { stop, next })
     } else {
-      return this._callMiddleware(restMiddleware, event)
+      thisMiddleware(event, { stop, next, error })
     }
+
+    if (stopped) {
+      return { finished: false, stopped: true }
+    }
+
+    if (parsedData != null) {
+      // was already in success middelware
+      if (event.res != null) {
+        event.res = parsedData
+      } else {
+        return { data: parsedData, finished: false, stopped: false }
+      }
+    }
+
+    if (thrownError != null) {
+      // was already in error middelware
+      if (event.err != null) {
+        event.err = thrownError
+      } else {
+        return { error: thrownError, finished: false, stopped: false }
+      }
+    }
+
+    if (restMiddleware.length === 0) {
+      return { finished: true, stopped: false }
+    }
+
+    return this._callMiddleware(restMiddleware, event)
   }
 }

@@ -16,96 +16,24 @@ describe('request', () => {
     sandbox.restore()
   })
 
-  it('calls _callRequestMiddleware, giving the arguments, a res and a rej function', () => {
+  it('calls _callRequestMiddleware, giving the arguments', () => {
     let args = []
     sandbox
       .stub(MyWrappedFetcher, '_callRequestMiddleware')
-      .callsFake(({ args, res, rej }) => {
+      .callsFake(({ args }) => {
         expect(args).toEqual(args)
-        expect(res).toBeInstanceOf(Function)
-        expect(rej).toBeInstanceOf(Function)
         return {}
       })
     MyWrappedFetcher.request(...args)
     assert.calledOnce(MyWrappedFetcher._callRequestMiddleware)
   })
 
-  describe('if res is called', () => {
-    const response = {}
+  describe('if _callRequestMiddleware returns { stopped: true }', () => {
     let args = []
     beforeEach(() => {
       sandbox
         .stub(MyWrappedFetcher, '_callRequestMiddleware')
-        .callsFake(({ res }) => {
-          res(response)
-          return {}
-        })
-    })
-
-    afterEach(() => {
-      sandbox.restore()
-    })
-
-    it('calls _callSuccessMiddleware with the arguments and the provided response', () => {
-      sandbox.spy(MyWrappedFetcher, '_callSuccessMiddleware')
-
-      MyWrappedFetcher.request(...args)
-
-      assert.calledOnce(MyWrappedFetcher._callSuccessMiddleware)
-      assert.calledWith(MyWrappedFetcher._callSuccessMiddleware, {
-        args: [],
-        res: response
-      })
-    })
-
-    it('does not call the action', () => {
-      sandbox.spy(MyWrappedFetcher, '_action')
-      MyWrappedFetcher.request(...args)
-      assert.notCalled(MyWrappedFetcher._action)
-    })
-  })
-
-  describe('if rej is called', () => {
-    const error = {}
-    let args = []
-    beforeEach(() => {
-      sandbox
-        .stub(MyWrappedFetcher, '_callRequestMiddleware')
-        .callsFake(({ rej }) => {
-          rej(error)
-          return {}
-        })
-    })
-
-    afterEach(() => {
-      sandbox.restore()
-    })
-
-    it('calls _callErrorMiddleware with the arguments and the provided error', () => {
-      sandbox.spy(MyWrappedFetcher, '_callErrorMiddleware')
-
-      MyWrappedFetcher.request(...args)
-
-      assert.calledOnce(MyWrappedFetcher._callErrorMiddleware)
-      assert.calledWith(MyWrappedFetcher._callErrorMiddleware, {
-        args,
-        err: error
-      })
-    })
-
-    it('does not call the action', () => {
-      sandbox.spy(MyWrappedFetcher, '_action')
-      MyWrappedFetcher.request(...args)
-      assert.notCalled(MyWrappedFetcher._action)
-    })
-  })
-
-  describe('if _callRequestMiddleware returns { wasStopped: true }', () => {
-    let args = []
-    beforeEach(() => {
-      sandbox
-        .stub(MyWrappedFetcher, '_callRequestMiddleware')
-        .returns({ wasStopped: true })
+        .returns({ stopped: true })
     })
 
     afterEach(() => {
@@ -131,7 +59,40 @@ describe('request', () => {
     })
   })
 
-  describe('if the action gets called', () => {
+  describe('if _callRequestMiddleware returns { data: * }', () => {
+    const data = {}
+    let args = []
+    beforeEach(() => {
+      sandbox.stub(MyWrappedFetcher, '_callRequestMiddleware').returns({ data })
+    })
+
+    afterEach(() => {
+      sandbox.restore()
+    })
+
+    it('calls _callSuccessMiddleware with that data set as the response', () => {
+      sandbox.spy(MyWrappedFetcher, '_callSuccessMiddleware')
+      MyWrappedFetcher.request(...args)
+      assert.calledWith(MyWrappedFetcher._callSuccessMiddleware, {
+        args,
+        res: data
+      })
+    })
+
+    it('does not call _callErrorMiddleware', () => {
+      sandbox.spy(MyWrappedFetcher, '_callErrorMiddleware')
+      MyWrappedFetcher.request(...args)
+      assert.notCalled(MyWrappedFetcher._callErrorMiddleware)
+    })
+
+    it('does not call _action', () => {
+      sandbox.spy(MyWrappedFetcher, '_action')
+      MyWrappedFetcher.request(...args)
+      assert.notCalled(MyWrappedFetcher._action)
+    })
+  })
+
+  describe('otherwise the wrapped action gets called', () => {
     let args = []
 
     afterEach(() => {

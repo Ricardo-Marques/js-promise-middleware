@@ -2,7 +2,7 @@ import sinon, { assert } from 'sinon'
 
 import PromiseMiddleware from '../index'
 
-describe('callMiddlware', () => {
+describe('callmiddleware', () => {
   const sandbox = sinon.sandbox.create()
   const fetcher = () => new Promise(() => {})
   let MyWrappedFetcher
@@ -18,55 +18,62 @@ describe('callMiddlware', () => {
   it('returns a finished state object if no middleware is given', () => {
     expect(MyWrappedFetcher._callMiddleware([])).toEqual({
       finished: true,
-      canceled: false
+      stopped: false
     })
   })
 
-  it('calls the first middleware, giving the eventProperties and a "stop" cb', () => {
-    const eventProperties = {}
+  it('calls the first middleware, giving the event, stop, next and error callbacks', () => {
+    const event = {}
     const middleware = [
-      sandbox.stub().callsFake((eventProperties, stop) => {
-        expect(eventProperties).toEqual(eventProperties)
+      sandbox.stub().callsFake((event, { stop, next, error }) => {
+        expect(event).toEqual(event)
         expect(stop).toBeInstanceOf(Function)
+        expect(next).toBeInstanceOf(Function)
+        expect(error).toBeInstanceOf(Function)
       })
     ]
 
-    MyWrappedFetcher._callMiddleware(middleware, eventProperties)
+    MyWrappedFetcher._callMiddleware(middleware, event)
     assert.calledOnce(middleware[0])
   })
 
-  it('stops middleware execution if any of the middleware call "stop"', () => {
-    const middlewareThatWillBeCalled = [sandbox.spy(), sandbox.spy()]
-    const middlewareThatWillNotBeCalled = [sandbox.spy(), sandbox.spy()]
-    const middlewareThatStopsExecution = (eventProperties, stop) => {
-      stop()
-    }
+  describe('stop', () => {
+    it('stops middleware execution if any of the middleware call "stop"', () => {
+      const middlewareThatWillBeCalled = [sandbox.spy(), sandbox.spy()]
+      const middlewareThatWillNotBeCalled = [sandbox.spy(), sandbox.spy()]
+      const middlewareThatStopsExecution = (event, { stop }) => {
+        stop()
+      }
 
-    const middleware = [
-      ...middlewareThatWillBeCalled,
-      middlewareThatStopsExecution,
-      ...middlewareThatWillNotBeCalled
-    ]
+      const middleware = [
+        ...middlewareThatWillBeCalled,
+        middlewareThatStopsExecution,
+        ...middlewareThatWillNotBeCalled
+      ]
 
-    MyWrappedFetcher._callMiddleware(middleware)
+      MyWrappedFetcher._callMiddleware(middleware, {})
 
-    middlewareThatWillBeCalled.forEach(middleware => {
-      assert.calledOnce(middleware)
+      middlewareThatWillBeCalled.forEach(middleware => {
+        assert.calledOnce(middleware)
+      })
+
+      middlewareThatWillNotBeCalled.forEach(middleware => {
+        assert.notCalled(middleware)
+      })
     })
 
-    middlewareThatWillNotBeCalled.forEach(middleware => {
-      assert.notCalled(middleware)
+    it('returns a stopped status if any middleware call "stop"', () => {
+      const middlewareThatStopsExecution = (event, { stop }) => {
+        stop()
+      }
+
+      const result = MyWrappedFetcher._callMiddleware(
+        [middlewareThatStopsExecution],
+        {}
+      )
+      expect(result).toEqual({ stopped: true, finished: false })
     })
   })
 
-  it('returns a canceled status if any middlware call "stop"', () => {
-    const middlewareThatStopsExecution = (eventProperties, stop) => {
-      stop()
-    }
-
-    const result = MyWrappedFetcher._callMiddleware([
-      middlewareThatStopsExecution
-    ])
-    expect(result).toEqual({ canceled: true, finished: false })
-  })
+  describe('next', () => {})
 })

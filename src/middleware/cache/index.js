@@ -15,13 +15,14 @@ const cache = (idGetter: IdGetter) => (
   const getCachedValue = id => fetcherCache[id]
   const setCachedValue = (id, value) => (fetcherCache[id] = value)
 
-  const onRequest = ({ res, args }) => {
+  const onRequest = ({ args }, { next }) => {
     const id = idGetter(...args)
     const cachedValue = getCachedValue(id)
 
     if (cachedValue != null) {
-      // if I have the response cached, resolve the fetch
-      res(cachedValue)
+      // if I have the response cached, resolve the request with this data
+      // don't call the server again
+      next(cachedValue)
     }
   }
 

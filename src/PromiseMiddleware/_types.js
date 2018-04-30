@@ -6,34 +6,53 @@ export type Action = (*) => Promise<*>
 type Arguments_<A, F: (...args: A) => any> = A
 export type Arguments<F> = Arguments_<*, F>
 
-export type RequestEvent<A, RT, ET> = {|
-  args: A,
-  res: RT => void,
-  rej: ET => void
-|}
+export type Event<A, RT, ET> =
+  | RequestEvent<A>
+  | SuccessEvent<A, RT>
+  | ErrorEvent<A, ET>
+
+export type RequestEvent<A> = {| args: A |}
 export type SuccessEvent<A, RT> = {| args: A, res: RT |}
 export type ErrorEvent<A, ET> = {| args: A, err: ET |}
 
+export type Stop = () => void
+
+export type Next<RT> = RT => void
+
+export type Error<ET> = ER => void
+
+export type EventCallbacks<A, RT, ET> = {|
+  stop: Stop,
+  next: Next<RT>,
+  error: Error<ET>
+|}
+
 export type RequestMiddleware<A, RT, ET> = (
-  RequestEvent<A, RT, ET>,
-  Stop
+  RequestEvent<A>,
+  EventCallbacks<A, RT, ET>
 ) => void
-export type SuccessMiddleware<A, RT> = (SuccessEvent<A, RT>, Stop) => void
-export type ErrorMiddleware<A, ET> = (ErrorEvent<A, ET>, Stop) => void
+export type SuccessMiddleware<A, RT, ET> = (
+  SuccessEvent<A, RT>,
+  EventCallbacks<A, RT, ET>
+) => void
+export type ErrorMiddleware<A, RT, ET> = (
+  ErrorEvent<A, ET>,
+  EventCallbacks<A, RT, ET>
+) => void
 
 export type ActionMiddleware<A, RT, ET> = {|
   onRequest: RequestMiddleware<A, RT, ET>[],
-  onSuccess: SuccessMiddleware<A, RT>[],
-  onError: ErrorMiddleware<A, ET>[]
+  onSuccess: SuccessMiddleware<A, RT, ET>[],
+  onError: ErrorMiddleware<A, RT, ET>[]
 |}
 
 export type Unsubscribe = () => void
 
-export type Stop = () => void
-
-export type MiddlewareResult = {|
+export type MiddlewareResult<RT, ET> = {|
   finished: boolean,
-  canceled: boolean
+  stopped: boolean,
+  data?: RT,
+  error?: ET
 |}
 
 /**
