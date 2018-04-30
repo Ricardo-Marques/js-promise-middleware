@@ -74,7 +74,6 @@ export default class PromiseMiddleware<T: Action, RT, ET>
   }
 
   onRequest(middleware: RequestMiddleware<Arguments<T>, RT, ET>) {
-    this._middleware.onRequest = this._middleware.onRequest || []
     this._middleware.onRequest.push(middleware)
     return () => {
       this._middleware.onRequest.splice(
@@ -85,7 +84,6 @@ export default class PromiseMiddleware<T: Action, RT, ET>
   }
 
   onSuccess(middleware: SuccessMiddleware<Arguments<T>, RT>) {
-    this._middleware.onSuccess = this._middleware.onSuccess || []
     this._middleware.onSuccess.push(middleware)
     return () => {
       this._middleware.onSuccess.splice(
@@ -96,7 +94,6 @@ export default class PromiseMiddleware<T: Action, RT, ET>
   }
 
   onError(middleware: ErrorMiddleware<Arguments<T>, ET>) {
-    this._middleware.onError = this._middleware.onError || []
     this._middleware.onError.push(middleware)
     return () => {
       this._middleware.onError.splice(
