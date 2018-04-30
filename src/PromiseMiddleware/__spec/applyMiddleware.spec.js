@@ -1,3 +1,4 @@
+// @flow
 import PromiseMiddleware from '../index'
 
 describe('applyMiddleware', () => {

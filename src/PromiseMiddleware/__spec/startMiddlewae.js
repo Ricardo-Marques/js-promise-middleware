@@ -1,8 +1,9 @@
+// @flow
 import sinon, { assert } from 'sinon'
 
 import PromiseMiddleware from '../index'
 
-describe('onEvent', () => {
+describe('startMiddleware', () => {
   const sandbox = sinon.sandbox.create()
   const fetcher = () => new Promise(() => {})
   let MyWrappedFetcher
@@ -15,57 +16,68 @@ describe('onEvent', () => {
     sandbox.restore()
   })
 
-  describe('_callRequestMiddleware', () => {
+  describe('_startRequestMiddleware', () => {
     it('runs onRequest middleware passing in the event properties', () => {
       sandbox.spy(MyWrappedFetcher, '_callMiddleware')
 
       const middleware = () => {}
       MyWrappedFetcher._middleware.onRequest = [middleware]
 
-      const event = {}
-      MyWrappedFetcher._callRequestMiddleware(event)
+      const event = {
+        type: 'REQUEST',
+        args: []
+      }
+      MyWrappedFetcher._startRequestMiddleware(event)
 
-      assert.calledOnce(MyWrappedFetcher._callMiddleware)
+      assert.calledOnce(MyWrappedFetcher._callRequestMiddleware)
       assert.calledWith(
-        MyWrappedFetcher._callMiddleware,
+        MyWrappedFetcher._callRequestMiddleware,
         [middleware],
         event
       )
     })
   })
 
-  describe('_callSuccessMiddleware', () => {
+  describe('_startSuccessMiddleware', () => {
     it('runs onSuccess middleware passing in the event properties', () => {
       sandbox.spy(MyWrappedFetcher, '_callMiddleware')
 
       const middleware = () => {}
       MyWrappedFetcher._middleware.onSuccess = [middleware]
 
-      const event = {}
-      MyWrappedFetcher._callSuccessMiddleware(event)
+      const event = {
+        type: 'SUCCESS',
+        args: [],
+        res: {}
+      }
+      MyWrappedFetcher._startSuccessMiddleware(event)
 
-      assert.calledOnce(MyWrappedFetcher._callMiddleware)
+      assert.calledOnce(MyWrappedFetcher._callSuccessMiddleware)
       assert.calledWith(
-        MyWrappedFetcher._callMiddleware,
+        MyWrappedFetcher._callSuccessMiddleware,
         [middleware],
         event
       )
     })
   })
 
-  describe('_callErrorMiddleware', () => {
+  describe('_startErrorMiddleware', () => {
     it('runs onError middleware passing in the event properties', () => {
       sandbox.spy(MyWrappedFetcher, '_callMiddleware')
 
       const middleware = () => {}
       MyWrappedFetcher._middleware.onError = [middleware]
 
-      const event = {}
-      MyWrappedFetcher._callErrorMiddleware(event)
+      const event = {
+        type: 'ERROR',
+        args: [],
+        err: {}
+      }
+      MyWrappedFetcher._startErrorMiddleware(event)
 
-      assert.calledOnce(MyWrappedFetcher._callMiddleware)
+      assert.calledOnce(MyWrappedFetcher._callErrorMiddleware)
       assert.calledWith(
-        MyWrappedFetcher._callMiddleware,
+        MyWrappedFetcher._callErrorMiddleware,
         [middleware],
         event
       )

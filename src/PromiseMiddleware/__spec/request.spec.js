@@ -16,23 +16,23 @@ describe('request', () => {
     sandbox.restore()
   })
 
-  it('calls _callRequestMiddleware, giving the arguments', () => {
+  it('calls _startRequestMiddleware, giving the arguments', () => {
     let args = []
     sandbox
-      .stub(MyWrappedFetcher, '_callRequestMiddleware')
+      .stub(MyWrappedFetcher, '_startRequestMiddleware')
       .callsFake(({ args }) => {
         expect(args).toEqual(args)
         return {}
       })
     MyWrappedFetcher.request(...args)
-    assert.calledOnce(MyWrappedFetcher._callRequestMiddleware)
+    assert.calledOnce(MyWrappedFetcher._startRequestMiddleware)
   })
 
-  describe('if _callRequestMiddleware returns { stopped: true }', () => {
+  describe('if _startRequestMiddleware returns { stopped: true }', () => {
     let args = []
     beforeEach(() => {
       sandbox
-        .stub(MyWrappedFetcher, '_callRequestMiddleware')
+        .stub(MyWrappedFetcher, '_startRequestMiddleware')
         .returns({ stopped: true })
     })
 
@@ -40,16 +40,16 @@ describe('request', () => {
       sandbox.restore()
     })
 
-    it('does not call _callSuccessMiddleware', () => {
-      sandbox.spy(MyWrappedFetcher, '_callSuccessMiddleware')
+    it('does not call _startSuccessMiddleware', () => {
+      sandbox.spy(MyWrappedFetcher, '_startSuccessMiddleware')
       MyWrappedFetcher.request(...args)
-      assert.notCalled(MyWrappedFetcher._callSuccessMiddleware)
+      assert.notCalled(MyWrappedFetcher._startSuccessMiddleware)
     })
 
-    it('does not call _callErrorMiddleware', () => {
-      sandbox.spy(MyWrappedFetcher, '_callErrorMiddleware')
+    it('does not call _startErrorMiddleware', () => {
+      sandbox.spy(MyWrappedFetcher, '_startErrorMiddleware')
       MyWrappedFetcher.request(...args)
-      assert.notCalled(MyWrappedFetcher._callErrorMiddleware)
+      assert.notCalled(MyWrappedFetcher._startErrorMiddleware)
     })
 
     it('does not call _action', () => {
@@ -59,30 +59,33 @@ describe('request', () => {
     })
   })
 
-  describe('if _callRequestMiddleware returns { data: * }', () => {
+  describe('if _startRequestMiddleware returns { data: * }', () => {
     const data = {}
     let args = []
     beforeEach(() => {
-      sandbox.stub(MyWrappedFetcher, '_callRequestMiddleware').returns({ data })
+      sandbox
+        .stub(MyWrappedFetcher, '_startRequestMiddleware')
+        .returns({ data })
     })
 
     afterEach(() => {
       sandbox.restore()
     })
 
-    it('calls _callSuccessMiddleware with that data set as the response', () => {
-      sandbox.spy(MyWrappedFetcher, '_callSuccessMiddleware')
+    it('calls _startSuccessMiddleware with that data set as the response', () => {
+      sandbox.spy(MyWrappedFetcher, '_startSuccessMiddleware')
       MyWrappedFetcher.request(...args)
-      assert.calledWith(MyWrappedFetcher._callSuccessMiddleware, {
+      assert.calledWith(MyWrappedFetcher._startSuccessMiddleware, {
+        type: 'SUCCESS',
         args,
         res: data
       })
     })
 
-    it('does not call _callErrorMiddleware', () => {
-      sandbox.spy(MyWrappedFetcher, '_callErrorMiddleware')
+    it('does not call _startErrorMiddleware', () => {
+      sandbox.spy(MyWrappedFetcher, '_startErrorMiddleware')
       MyWrappedFetcher.request(...args)
-      assert.notCalled(MyWrappedFetcher._callErrorMiddleware)
+      assert.notCalled(MyWrappedFetcher._startErrorMiddleware)
     })
 
     it('does not call _action', () => {
@@ -100,7 +103,7 @@ describe('request', () => {
     })
 
     describe('if it resolves', () => {
-      it('calls _callSuccessMiddleware with the arguments and the response', done => {
+      it('calls _startSuccessMiddleware with the arguments and the response', done => {
         const response = {}
         const MyWrappedFetcher = new PromiseMiddleware(
           () =>
@@ -108,8 +111,9 @@ describe('request', () => {
               res(response)
               setTimeout(() => {
                 try {
-                  assert.calledOnce(MyWrappedFetcher._callSuccessMiddleware)
-                  assert.calledWith(MyWrappedFetcher._callSuccessMiddleware, {
+                  assert.calledOnce(MyWrappedFetcher._startSuccessMiddleware)
+                  assert.calledWith(MyWrappedFetcher._startSuccessMiddleware, {
+                    type: 'SUCCESS',
                     args,
                     res: response
                   })
@@ -121,14 +125,14 @@ describe('request', () => {
             })
         )
 
-        sandbox.spy(MyWrappedFetcher, '_callSuccessMiddleware')
-        sandbox.stub(MyWrappedFetcher, '_callRequestMiddleware').returns({})
+        sandbox.spy(MyWrappedFetcher, '_startSuccessMiddleware')
+        sandbox.stub(MyWrappedFetcher, '_startRequestMiddleware').returns({})
         MyWrappedFetcher.request(...args)
       })
     })
 
     describe('if it fails', () => {
-      it('calls _callErrorMiddleware with the arguments and the error', done => {
+      it('calls _startErrorMiddleware with the arguments and the error', done => {
         const error = {}
         const MyWrappedFetcher = new PromiseMiddleware(
           () =>
@@ -136,8 +140,9 @@ describe('request', () => {
               rej(error)
               setTimeout(() => {
                 try {
-                  assert.calledOnce(MyWrappedFetcher._callErrorMiddleware)
-                  assert.calledWith(MyWrappedFetcher._callErrorMiddleware, {
+                  assert.calledOnce(MyWrappedFetcher._startErrorMiddleware)
+                  assert.calledWith(MyWrappedFetcher._startErrorMiddleware, {
+                    type: 'ERROR',
                     args,
                     err: error
                   })
@@ -149,8 +154,8 @@ describe('request', () => {
             })
         )
 
-        sandbox.spy(MyWrappedFetcher, '_callErrorMiddleware')
-        sandbox.stub(MyWrappedFetcher, '_callRequestMiddleware').returns({})
+        sandbox.spy(MyWrappedFetcher, '_startErrorMiddleware')
+        sandbox.stub(MyWrappedFetcher, '_startRequestMiddleware').returns({})
         MyWrappedFetcher.request(...args)
       })
     })
