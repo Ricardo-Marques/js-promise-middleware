@@ -1,6 +1,6 @@
 {
   "name": "js-promise-middleware",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "A middleware wrapper for promises that simplifies side effect management.",
   "main": "./es/index.js",
   "scripts": {
