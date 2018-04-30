@@ -47,20 +47,20 @@ export default UserFetcher
 ```javascript
 import UserFetcher from 'fetchers/User'
 // every time the UserFetcher successfully resolves, fire this callback
-// args will be an array of the arguments provided when we call "execute" and res will be whatever the promise
+// args will be an array of the arguments provided when we call "request" and res will be whatever the promise
 // originally given to the PromiseMiddleware resolved with
-UserFetcher.applyOnSuccessMiddleware(({ res, args }) => onUserFetchSuccess(res, idGetter(...args)))
+UserFetcher.onSuccess(({ res, args }) => onUserFetchSuccess(res, idGetter(...args)))
 
 function onUserFetchSuccess (user, id) {
   console.log(`Got the user with the id ${id}!`, user)
 }
 
-UserFetcher.execute(1)
-UserFetcher.execute(1) // does not call the server because we are deduping requests to the same user
-UserFetcher.execute(2)
+UserFetcher.request(1)
+UserFetcher.request(1) // does not call the server because we are deduping requests to the same user
+UserFetcher.request(2)
 
 // ...sometime later
-UserFetcher.execute(2) // does not call the server because we applied a cache to this fetcher
+UserFetcher.request(2) // does not call the server because we applied a cache to this fetcher
 ```
 
 ## Publishing
