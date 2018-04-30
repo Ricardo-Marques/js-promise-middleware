@@ -26,7 +26,7 @@ const fetchUser = id => fetch(`/users/${id}`).then(res => res.json())
 const UserFetcher = new PromiseMiddleware(fetchUser)
 
 // tell the cache how to get the entity's id based on the arguments the fetch request is given
-const idGetter = (...args) => args[0]
+const idGetter = id => id
 
 // cache requests using a normalized state tree
 cache(idGetter)(UserFetcher)
@@ -50,10 +50,10 @@ import UserFetcher from 'fetchers/User'
 // args will be an array of the arguments provided when we call "request" and res will be whatever the promise
 // originally given to the PromiseMiddleware resolved with
 // returns a callback to unsubscribe the middleware
-const unsubscribe = UserFetcher.onSuccess(({ res, args }) => onUserFetchSuccess(res, idGetter(...args)))
+const unsubscribe = UserFetcher.onSuccess(onUserFetchSuccess)
 
-function onUserFetchSuccess({ res }) {
-  console.log(`Got the user with the id ${id}!`, res)
+function onUserFetchSuccess({ res, args }) {
+  console.log(`Got the user with the id ${idGetter(...args)}!`, res)
 }
 
 UserFetcher.request(1)
