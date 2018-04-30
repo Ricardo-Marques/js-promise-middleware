@@ -49,10 +49,11 @@ import UserFetcher from 'fetchers/User'
 // every time the UserFetcher successfully resolves, fire this callback
 // args will be an array of the arguments provided when we call "request" and res will be whatever the promise
 // originally given to the PromiseMiddleware resolved with
-UserFetcher.onSuccess(({ res, args }) => onUserFetchSuccess(res, idGetter(...args)))
+// returns a callback to unsubscribe the middleware
+const unsubscribe = UserFetcher.onSuccess(({ res, args }) => onUserFetchSuccess(res, idGetter(...args)))
 
-function onUserFetchSuccess (user, id) {
-  console.log(`Got the user with the id ${id}!`, user)
+function onUserFetchSuccess({ res }) {
+  console.log(`Got the user with the id ${id}!`, res)
 }
 
 UserFetcher.request(1)
@@ -61,6 +62,8 @@ UserFetcher.request(2)
 
 // ...sometime later
 UserFetcher.request(2) // does not call the server because we applied a cache to this fetcher
+unsubscribe() // when we no longer care about request events, we can unsubscribe to avoid memory leaks
+//
 ```
 
 ## Publishing
