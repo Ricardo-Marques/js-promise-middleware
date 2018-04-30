@@ -2,6 +2,7 @@
 export type Action = (*) => Promise<*>
 
 // extract arguments from a function type
+/* eslint-disable-line no-unused-vars */
 type Arguments_<A, F: (...args: A) => any> = A
 export type Arguments<F> = Arguments_<*, F>
 
