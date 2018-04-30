@@ -1,121 +1,125 @@
 // @flow
-type EventProperties = {|
-  onRequest: {| args: Array<*>, res: (*) => void, rej: (*) => void |},
-  onSuccess: {| args: Array<*>, res: * |},
-  onError: {| args: Array<*>, err: * |}
-|}
+import type {
+  IPromiseMiddleware,
+  Action,
+  Arguments,
+  ActionMiddleware,
+  RequestMiddleware,
+  SuccessMiddleware,
+  ErrorMiddleware,
+  RequestEvent,
+  SuccessEvent,
+  ErrorEvent,
+  MiddlewareResult
+} from './_types'
 
-type MiddlewareTypes = {|
-  onRequest: (eventProperties: $PropertyType<EventProperties, 'onRequest'>, stop: Stop) => void,
-  onSuccess: (eventProperties: $PropertyType<EventProperties, 'onSuccess'>, stop: Stop) => void,
-  onError: (eventProperties: $PropertyType<EventProperties, 'onError'>, stop: Stop) => void,
-|}
-
-type Stop = () => void
-
-type ActionMiddleware = {
-  onRequest?: ?Array<$PropertyType<MiddlewareTypes, 'onRequest'>>,
-  onSuccess?: ?Array<$PropertyType<MiddlewareTypes, 'onSuccess'>>,
-  onError?: ?Array<$PropertyType<MiddlewareTypes, 'onError'>>
-}
-
-type Action = (*) => Promise<*>
-
-export default class PromiseMiddleware<T: Action> {
+export default class PromiseMiddleware<T: Action, RT, ET>
+  implements IPromiseMiddleware<T, RT, ET> {
   _action: T
-  _middleware: ActionMiddleware
+  _middleware: ActionMiddleware<Arguments<T>, RT, ET>
 
-  constructor (action: T) {
+  constructor(action: T) {
     this._action = action
-    this._middleware = {}
+    this._middleware = {
+      onRequest: [],
+      onSuccess: [],
+      onError: []
+    }
   }
 
-  execute (...args: Array<*>) {
+  request(...args: Arguments<T>) {
     let hardCodedResponse = undefined
-    const res = response => hardCodedResponse = response
+    const res = (response: RT): void => {
+      hardCodedResponse = response
+    }
 
     let hardCodedError = undefined
-    const rej = error => hardCodedError = error
+    const rej = (error: ET): void => {
+      hardCodedError = error
+    }
 
-    const requestMiddlewareResult = this._onRequest({ args, res, rej })
+    const requestMiddlewareResult = this._callRequestMiddleware({
+      args,
+      res,
+      rej
+    })
 
     // if any of the onRequest middleware asked to stop
-    if (requestMiddlewareResult.wasStopped) {
+    if (requestMiddlewareResult.canceled) {
       return
     }
 
     // if any of the onRequest middleware called setResponse we call on sucess middleware
     if (hardCodedResponse !== undefined) {
-      this._onSuccess({ args, res: hardCodedResponse })
+      this._callSuccessMiddleware({ args, res: hardCodedResponse })
       return
     }
 
     // if any of the onRequest middleware called setError we call on error middleware
     if (hardCodedError !== undefined) {
-      this._onError({ args, err: hardCodedError })
+      this._callErrorMiddleware({ args, err: hardCodedError })
       return
     }
 
     // otherwise execute the action and either call onSuccess or onError middleware
     // if any of those middleware call stop, no further middleware will be executed
-    this._action(...args)
-      .then(
-        res => {
-          this._onSuccess({ args, res })
-        },
-        err => {
-          this._onError({ args, err })
-        }
-      )
+    this._action(...args).then(
+      res => {
+        this._callSuccessMiddleware({ args, res })
+      },
+      err => {
+        this._callErrorMiddleware({ args, err })
+      }
+    )
   }
 
-  applyOnRequestMiddleware (middleware: $PropertyType<MiddlewareTypes, 'onRequest'>) {
+  onRequest(middleware: RequestMiddleware<Arguments<T>, RT, ET>) {
     this._middleware.onRequest = this._middleware.onRequest || []
     this._middleware.onRequest.push(middleware)
   }
 
-  applyOnSuccessMiddleware (middleware: $PropertyType<MiddlewareTypes, 'onSuccess'>) {
+  onSuccess(middleware: SuccessMiddleware<Arguments<T>, RT>) {
     this._middleware.onSuccess = this._middleware.onSuccess || []
     this._middleware.onSuccess.push(middleware)
   }
 
-  applyOnErrorMiddleware (middleware: $PropertyType<MiddlewareTypes, 'onError'>) {
+  onError(middleware: ErrorMiddleware<Arguments<T>, ET>) {
     this._middleware.onError = this._middleware.onError || []
     this._middleware.onError.push(middleware)
   }
 
-  _onRequest (eventProperties: $PropertyType<EventProperties, 'onRequest'>) {
-    return this._callMiddleware(this._middleware.onRequest, eventProperties)
+  _callRequestMiddleware(event: RequestEvent<Arguments<T>, RT, ET>) {
+    return this._callMiddleware(this._middleware.onRequest, event)
   }
 
-  _onSuccess (eventProperties: $PropertyType<EventProperties, 'onSuccess'>) {
-    return this._callMiddleware(this._middleware.onSuccess, eventProperties)
+  _callSuccessMiddleware(event: SuccessEvent<Arguments<T>, RT>) {
+    return this._callMiddleware(this._middleware.onSuccess, event)
   }
 
-  _onError (eventProperties: $PropertyType<EventProperties, 'onError'>) {
-    return this._callMiddleware(this._middleware.onError, eventProperties)
+  _callErrorMiddleware(event: ErrorEvent<Arguments<T>, ET>) {
+    return this._callMiddleware(this._middleware.onError, event)
   }
 
-  _callMiddleware (middleware: ?Array<*>, eventProperties: *) {
-    if (middleware == null || middleware.length === 0) {
-      return { finished: true }
+  _callMiddleware(middleware: Array<*>, event: *): MiddlewareResult {
+    if (middleware.length === 0) {
+      return { finished: true, canceled: false }
     }
 
-    const [ thisMiddleware, ...restMiddleware ] = middleware
+    const [thisMiddleware, ...restMiddleware] = middleware
 
-    let wasStopped = false
+    let canceled = false
     const stop = () => {
-      wasStopped = true
+      canceled = true
     }
 
-    thisMiddleware(eventProperties, stop)
+    thisMiddleware(event, stop)
 
-    if (wasStopped) {
-      return { wasStopped: true }
+    if (canceled) {
+      return { canceled: true, finished: false }
     } else if (restMiddleware.length === 0) {
-      return { finished: true }
+      return { finished: true, canceled: false }
     } else {
-      return this._callMiddleware(restMiddleware, eventProperties)
+      return this._callMiddleware(restMiddleware, event)
     }
   }
 }

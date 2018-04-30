@@ -1,24 +1,23 @@
-import Promise from 'promise'
 import PromiseMiddleware from '../../PromiseMiddleware'
 
 import cache from './index'
 
 describe('cache', () => {
   let iterator = 0
-  const fetchIterator = () => new Promise(res => {
-    iterator++
-    res(iterator)
-  })
-
+  const fetchIterator = () =>
+    new Promise(res => {
+      iterator++
+      res(iterator)
+    })
 
   const IteratorFetcher = cache(id => id)(new PromiseMiddleware(fetchIterator))
 
-  it('caches values based on an idGetter', (done) => {
+  it('caches values based on an idGetter', done => {
     let hasVerifiedCachedValue = false
-    IteratorFetcher.applyOnSuccessMiddleware(({ res }) => {
+    IteratorFetcher.onSuccess(({ res }) => {
       if (!hasVerifiedCachedValue) {
         hasVerifiedCachedValue = true
-        IteratorFetcher.execute(1)
+        IteratorFetcher.request(1)
       } else {
         try {
           // the second time we get a success, the iterator should've gone up
@@ -33,6 +32,6 @@ describe('cache', () => {
       }
     })
 
-    IteratorFetcher.execute(1)
+    IteratorFetcher.request(1)
   })
 })

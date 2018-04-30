@@ -1,4 +1,3 @@
-import Promise from 'promise'
 import PromiseMiddleware from '../index'
 
 describe('applyMiddleware', () => {
@@ -9,26 +8,26 @@ describe('applyMiddleware', () => {
     MyWrappedFetcher = new PromiseMiddleware(fetcher)
   })
 
-  describe('applyOnRequestMiddleware', () => {
-    it('adds onRequestMiddleware', () => {
+  describe('onRequest', () => {
+    it('adds onRequest middleware', () => {
       const middleware = () => {}
-      MyWrappedFetcher.applyOnRequestMiddleware(middleware)
+      MyWrappedFetcher.onRequest(middleware)
       expect(MyWrappedFetcher._middleware.onRequest).toEqual([middleware])
     })
   })
 
-  describe('applyOnSuccessMiddleware', () => {
-    it('adds onSuccessMiddleware', () => {
+  describe('onSuccess', () => {
+    it('adds onSuccess middleware', () => {
       const middleware = () => {}
-      MyWrappedFetcher.applyOnSuccessMiddleware(middleware)
+      MyWrappedFetcher.onSuccess(middleware)
       expect(MyWrappedFetcher._middleware.onSuccess).toEqual([middleware])
     })
   })
 
-  describe('applyOnErrorMiddleware', () => {
-    it('adds onErrorMiddleware', () => {
+  describe('onError', () => {
+    it('adds onError middleware', () => {
       const middleware = () => {}
-      MyWrappedFetcher.applyOnErrorMiddleware(middleware)
+      MyWrappedFetcher.onError(middleware)
       expect(MyWrappedFetcher._middleware.onError).toEqual([middleware])
     })
   })

@@ -1,12 +1,14 @@
 // @flow
-import PromiseMiddleware from '../../PromiseMiddleware'
+import type { IPromiseMiddleware } from '../../PromiseMiddleware/_types'
 
-type IdGetter = (ags: Array<*>) => string | number
+type IdGetter = (args: *) => string | number
 
 /**
  * dedupes requests of the same entity
  */
-const dedupe = (idGetter: IdGetter) => (fetcher: $Supertype<PromiseMiddleware<*>>) => {
+const dedupe = (idGetter: IdGetter) => (
+  fetcher: IPromiseMiddleware<*, *, *>
+) => {
   let underwayFetches = {}
 
   const onRequest = ({ args }, stop) => {
@@ -26,8 +28,8 @@ const dedupe = (idGetter: IdGetter) => (fetcher: $Supertype<PromiseMiddleware<*>
     }
   }
 
-  fetcher.applyOnRequestMiddleware(onRequest)
-  fetcher.applyOnSuccessMiddleware(onSuccess)
+  fetcher.onRequest(onRequest)
+  fetcher.onSuccess(onSuccess)
 
   return fetcher
 }

@@ -1,4 +1,3 @@
-import Promise from 'promise'
 import PromiseMiddleware from '../index'
 
 describe('PromiseMiddlware', () => {
@@ -15,7 +14,11 @@ describe('PromiseMiddlware', () => {
     })
 
     it('initializes an empty middleware cache', () => {
-      expect(MyWrappedFetcher._middleware).toEqual({})
+      expect(MyWrappedFetcher._middleware).toEqual({
+        onRequest: [],
+        onSuccess: [],
+        onError: []
+      })
     })
   })
 })
