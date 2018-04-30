@@ -1,7 +1,7 @@
-import Promise from 'promise'
+// @flow
 import PromiseMiddleware from '../index'
 
-describe('PromiseMiddlware', () => {
+describe('Promisemiddleware', () => {
   const fetcher = () => new Promise(() => {})
 
   let MyWrappedFetcher
@@ -15,7 +15,11 @@ describe('PromiseMiddlware', () => {
     })
 
     it('initializes an empty middleware cache', () => {
-      expect(MyWrappedFetcher._middleware).toEqual({})
+      expect(MyWrappedFetcher._middleware).toEqual({
+        onRequest: [],
+        onSuccess: [],
+        onError: []
+      })
     })
   })
 })

@@ -1,4 +1,4 @@
-import Promise from 'promise'
+// @flow
 import PromiseMiddleware from '../index'
 
 describe('applyMiddleware', () => {
@@ -9,27 +9,51 @@ describe('applyMiddleware', () => {
     MyWrappedFetcher = new PromiseMiddleware(fetcher)
   })
 
-  describe('applyOnRequestMiddleware', () => {
-    it('adds onRequestMiddleware', () => {
+  describe('onRequest', () => {
+    it('adds onRequest middleware', () => {
       const middleware = () => {}
-      MyWrappedFetcher.applyOnRequestMiddleware(middleware)
+      MyWrappedFetcher.onRequest(middleware)
       expect(MyWrappedFetcher._middleware.onRequest).toEqual([middleware])
     })
-  })
 
-  describe('applyOnSuccessMiddleware', () => {
-    it('adds onSuccessMiddleware', () => {
+    it('returns an cb to unsubscribe the middleware', () => {
       const middleware = () => {}
-      MyWrappedFetcher.applyOnSuccessMiddleware(middleware)
-      expect(MyWrappedFetcher._middleware.onSuccess).toEqual([middleware])
+      MyWrappedFetcher._middleware.onRequest = []
+      const unsubscribe = MyWrappedFetcher.onRequest(middleware)
+      unsubscribe()
+      expect(MyWrappedFetcher._middleware.onRequest).toEqual([])
     })
   })
 
-  describe('applyOnErrorMiddleware', () => {
-    it('adds onErrorMiddleware', () => {
+  describe('onSuccess', () => {
+    it('adds onSuccess middleware', () => {
       const middleware = () => {}
-      MyWrappedFetcher.applyOnErrorMiddleware(middleware)
+      MyWrappedFetcher.onSuccess(middleware)
+      expect(MyWrappedFetcher._middleware.onSuccess).toEqual([middleware])
+    })
+
+    it('returns an cb to unsubscribe the middleware', () => {
+      const middleware = () => {}
+      MyWrappedFetcher._middleware.onSuccess = []
+      const unsubscribe = MyWrappedFetcher.onSuccess(middleware)
+      unsubscribe()
+      expect(MyWrappedFetcher._middleware.onSuccess).toEqual([])
+    })
+  })
+
+  describe('onError', () => {
+    it('adds onError middleware', () => {
+      const middleware = () => {}
+      MyWrappedFetcher.onError(middleware)
       expect(MyWrappedFetcher._middleware.onError).toEqual([middleware])
+    })
+
+    it('returns an cb to unsubscribe the middleware', () => {
+      const middleware = () => {}
+      MyWrappedFetcher._middleware.onError = []
+      const unsubscribe = MyWrappedFetcher.onError(middleware)
+      unsubscribe()
+      expect(MyWrappedFetcher._middleware.onError).toEqual([])
     })
   })
 })

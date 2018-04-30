@@ -1,25 +1,28 @@
 // @flow
-import PromiseMiddleware from '../../PromiseMiddleware'
+import type { IPromiseMiddleware } from '../../PromiseMiddleware/_types'
 
-type IdGetter = (ags: Array<*>) => string | number
+type IdGetter = (...args: mixed[]) => string | number
 
 /**
  * will immediately resolve an execute request if it has a cached value for the requested entity
  * instead of reaching out to the server again
  */
-const cache = (idGetter: IdGetter) => (fetcher: $Supertype<PromiseMiddleware<*>>) => {
+const cache = (idGetter: IdGetter) => (
+  fetcher: IPromiseMiddleware<*, *, *>
+) => {
   const fetcherCache = {}
 
   const getCachedValue = id => fetcherCache[id]
-  const setCachedValue = (id, value) => fetcherCache[id] = value
+  const setCachedValue = (id, value) => (fetcherCache[id] = value)
 
-  const onRequest = ({ res, args }) => {
+  const onRequest = ({ args }, { next }) => {
     const id = idGetter(...args)
     const cachedValue = getCachedValue(id)
 
     if (cachedValue != null) {
-      // if I have the response cached, resolve the fetch
-      res(cachedValue)
+      // if I have the response cached, resolve the request with this data
+      // don't call the server again
+      next(cachedValue)
     }
   }
 
@@ -31,8 +34,8 @@ const cache = (idGetter: IdGetter) => (fetcher: $Supertype<PromiseMiddleware<*>>
     }
   }
 
-  fetcher.applyOnRequestMiddleware(onRequest)
-  fetcher.applyOnSuccessMiddleware(onSuccess)
+  fetcher.onRequest(onRequest)
+  fetcher.onSuccess(onSuccess)
 
   return fetcher
 }
