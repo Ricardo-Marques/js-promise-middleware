@@ -1,13 +1,12 @@
 {
   "name": "js-promise-middleware",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A middleware wrapper for promises that simplifies side effect management.",
   "main": "./es/index.js",
   "scripts": {
     "build": "rimraf es && babel src --out-dir es && flow-copy-source src es && yarn run build:copy-files",
     "build:copy-files": "babel-node ./scripts/copy-files.js",
     "publish-package": "yarn run build && cd es && yarn publish",
-    "prepublishOnly": "yarn run build",
     "lint": "eslint src test",
     "test": "jest",
     "test:watch": "yarn test --watch",
