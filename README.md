@@ -4,8 +4,6 @@ A middleware wrapper for promises that simplifies side effect management.
 [![CircleCI](https://img.shields.io/circleci/project/github/Ricardo-Marques/js-promise-middleware.svg)](https://circleci.com/gh/ricardo-marques/js-promise-middleware) [![Coverage Status](https://img.shields.io/coveralls/github/Ricardo-Marques/js-promise-middleware.svg)](https://coveralls.io/github/Ricardo-Marques/js-promise-middleware?branch=master) [![NPM](https://img.shields.io/npm/v/js-promise-middleware.svg)](https://www.npmjs.com/package/js-promise-middleware) 
 
 
-https://img.shields.io/npm/v/js-promise-middleware.svg
-
 ## The problem
 
 You have a reactive application and are too lazy to learn how to use [observables](http://reactivex.io/rxjs/)?
