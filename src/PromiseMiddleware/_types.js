@@ -22,10 +22,12 @@ export type SuccessMiddleware<A, RT> = (SuccessEvent<A, RT>, Stop) => void
 export type ErrorMiddleware<A, ET> = (ErrorEvent<A, ET>, Stop) => void
 
 export type ActionMiddleware<A, RT, ET> = {|
-  onRequest?: ?(RequestMiddleware<A, RT, ET>[]),
-  onSuccess?: ?(SuccessMiddleware<A, RT>[]),
-  onError?: ?(ErrorMiddleware<A, ET>[])
+  onRequest: RequestMiddleware<A, RT, ET>[],
+  onSuccess: SuccessMiddleware<A, RT>[],
+  onError: ErrorMiddleware<A, ET>[]
 |}
+
+export type Unsubscribe = () => void
 
 export type Stop = () => void
 
@@ -43,9 +45,9 @@ export interface IPromiseMiddleware<T: Action, RT: *, ET: *> {
   -_action: T;
   -_middleware: ActionMiddleware<Arguments<T>, RT, ET>;
   +request: (Arguments<T>) => void;
-  +onRequest: (RequestMiddleware<Arguments<T>, RT, ET>) => void;
-  +onSuccess: (SuccessMiddleware<Arguments<T>, RT>) => void;
-  +onError: (ErrorMiddleware<Arguments<T>, ET>) => void;
+  +onRequest: (RequestMiddleware<Arguments<T>, RT, ET>) => Unsubscribe;
+  +onSuccess: (SuccessMiddleware<Arguments<T>, RT>) => Unsubscribe;
+  +onError: (ErrorMiddleware<Arguments<T>, ET>) => Unsubscribe;
   +_callRequestMiddleware: (
     RequestEvent<Arguments<T>, RT, ET>
   ) => MiddlewareResult;
