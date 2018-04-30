@@ -95,6 +95,42 @@ describe('request', () => {
     })
   })
 
+  describe('if _startRequestMiddleware returns { error: * }', () => {
+    const error = {}
+    let args = []
+    beforeEach(() => {
+      sandbox
+        .stub(MyWrappedFetcher, '_startRequestMiddleware')
+        .returns({ error })
+    })
+
+    afterEach(() => {
+      sandbox.restore()
+    })
+
+    it('calls _startErrorMiddleware with that error set as the err', () => {
+      sandbox.spy(MyWrappedFetcher, '_startErrorMiddleware')
+      MyWrappedFetcher.request(...args)
+      assert.calledWith(MyWrappedFetcher._startErrorMiddleware, {
+        type: 'ERROR',
+        args,
+        err: error
+      })
+    })
+
+    it('does not call _startSuccessMiddlewareMiddleware', () => {
+      sandbox.spy(MyWrappedFetcher, '_startSuccessMiddleware')
+      MyWrappedFetcher.request(...args)
+      assert.notCalled(MyWrappedFetcher._startSuccessMiddleware)
+    })
+
+    it('does not call _action', () => {
+      sandbox.spy(MyWrappedFetcher, '_action')
+      MyWrappedFetcher.request(...args)
+      assert.notCalled(MyWrappedFetcher._action)
+    })
+  })
+
   describe('otherwise the wrapped action gets called', () => {
     let args = []
 
